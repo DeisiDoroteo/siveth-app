@@ -5,6 +5,8 @@ const cors = require("cors");
 const moment = require('moment');
 const nodemailer = require('nodemailer');
 
+const bcrypt = require('bcryptjs');
+
 
 app.use(cors());
 app.use(express.json());
@@ -25,55 +27,70 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+
 // Registro de usuarios
 app.post('/Create', (req, res, next) => {
-    const { nombre, apellidoPaterno, apellidoMaterno, correo, telefono, contrasenia, edad } = req.body;
+  const { nombre, apellidoPaterno, apellidoMaterno, correo, telefono, contrasenia, edad } = req.body;
 
-    // Realiza alguna validación de datos (ejemplo: todos los campos son obligatorios)
-    if (!nombre || !apellidoPaterno || !apellidoMaterno || !correo || !telefono || !contrasenia || !edad) {
-        res.status(400).json({ status: 'error', message: 'Datos incompletos o inválidos' });
-    } else {
-        // Insertar datos en la base de datos
-        db.query('INSERT INTO Usuarios (Nombre, ApellidoP, ApellidoM, Correo, Telefono, Password, FechaN) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [nombre, apellidoPaterno, apellidoMaterno, correo, telefono, contrasenia, edad], (error, result) => {
-                if (error) {
-                    console.log('Error al insertar usuario en la base de datos:', error);
-                    res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
-                } else {
-                    res.json({ status: 'success', message: 'Usuario registrado con éxito' });
-                }
-            });
-    }
+  // Realiza alguna validación de datos (ejemplo: todos los campos son obligatorios)
+  if (!nombre || !apellidoPaterno || !apellidoMaterno || !correo || !telefono || !contrasenia || !edad) {
+      res.status(400).json({ status: 'error', message: 'Datos incompletos o inválidos' });
+  } else {
+      // Hash de la contraseña
+      bcrypt.hash(contrasenia, 10, (err, hashedPassword) => {
+          if (err) {
+              console.log('Error al hashear la contraseña:', err);
+              res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+          } else {
+              // Insertar datos en la base de datos con la contraseña hasheada
+              db.query('INSERT INTO Usuarios (Nombre, ApellidoP, ApellidoM, Correo, Telefono, Password, FechaN) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                  [nombre, apellidoPaterno, apellidoMaterno, correo, telefono, hashedPassword, edad], (error, result) => {
+                      if (error) {
+                          console.log('Error al insertar usuario en la base de datos:', error);
+                          res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+                      } else {
+                          res.json({ status: 'success', message: 'Usuario registrado con éxito' });
+                      }
+                  });
+          }
+      });
+  }
 });
-
-
 // Logueo
 app.post('/Login', (req, res, next) => {
-    const { correo, contrasenia } = req.body;
+  const { correo, contrasenia } = req.body;
 
-    // Consultar la base de datos para verificar las credenciales
-    const query = 'SELECT * FROM Usuarios WHERE Correo = ?';
-    db.query(query, [correo], (error, results) => {
-        if (error) {
-            console.error('Error al realizar la consulta en la base de datos:', error);
-            res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
-        } else {
-            if (results.length > 0) {
-                // Verificar la contraseña solo si se encontró el usuario
-                const usuario = results[0];
-                if (usuario.Password === contrasenia) {
-                    // Usuario autenticado
-                    res.json({ status: 'success', message: 'Inicio de sesión exitoso' });
-                } else {
-                    // Contraseña incorrecta
-                    res.status(400).json({ status: 'error', message: 'Credenciales incorrectas' });
-                }
-            } else {
-                // Usuario no encontrado en la base de datos
-                res.status(400).json({ status: 'error', message: 'Usuario no registrado' });
-            }
-        }
-    });
+  // Consultar la base de datos para verificar las credenciales
+  const query = 'SELECT * FROM Usuarios WHERE Correo = ?';
+  db.query(query, [correo], (error, results) => {
+      if (error) {
+          console.error('Error al realizar la consulta en la base de datos:', error);
+          res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+      } else {
+          if (results.length > 0) {
+              // Usuario encontrado en la base de datos
+              const usuario = results[0];
+              // Comparar la contraseña hasheada almacenada en la base de datos con la contraseña proporcionada
+              bcrypt.compare(contrasenia, usuario.Password, (err, result) => {
+                  if (err) {
+                      console.error('Error al comparar contraseñas:', err);
+                      res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+                  } else {
+                      if (result) {
+                          // Contraseña correcta: Usuario autenticado
+                          res.json({ status: 'success', message: 'Inicio de sesión exitoso' });
+                      } else {
+                          // Contraseña incorrecta
+                          res.status(400).json({ status: 'error', message: 'Credenciales incorrectas' });
+                      }
+                  }
+              });
+          } else {
+              // Usuario no encontrado en la base de datos
+              res.status(400).json({ status: 'error', message: 'Usuario no registrado' });
+          }
+      }
+  });
 });
 
 
@@ -283,16 +300,25 @@ app.post('/verificar', (req, res) => {
 app.post("/cambiarContrasenia", (req, res) => {
   const { correo, contraseniaNueva } = req.body;
 
-  // Actualizar la contraseña en la base de datos
-  const sql = "UPDATE usuarios SET Password = ? WHERE Correo = ?";
-  connection.query(sql, [contraseniaNueva, correo], (err, result) => {
+  // Generar hash de la contraseña nueva
+  bcrypt.hash(contraseniaNueva, 10, (err, hashedPassword) => {
     if (err) {
-      console.error("Error al actualizar la contraseña:", err);
+      console.error("Error al generar hash de la contraseña nueva:", err);
       res.status(500).send("Error al actualizar la contraseña");
       return;
     }
-    console.log("Contraseña actualizada correctamente");
-    res.status(200).send("Contraseña actualizada correctamente");
+
+    // Actualizar la contraseña en la base de datos con el hash generado
+    const sql = "UPDATE usuarios SET Password = ? WHERE Correo = ?";
+    db.query(sql, [hashedPassword, correo], (err, result) => {
+      if (err) {
+        console.error("Error al actualizar la contraseña:", err);
+        res.status(500).send("Error al actualizar la contraseña");
+        return;
+      }
+      console.log("Contraseña actualizada correctamente");
+      res.status(200).send("Contraseña actualizada correctamente");
+    });
   });
 });
 
