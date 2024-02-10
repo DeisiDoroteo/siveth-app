@@ -40,7 +40,7 @@ export default function CambioPass() {
       console.log('Respuesta del servidor:', response);
   
       if (response.status === 200) {
-        alert('Contraseña cambiada exitosamente');
+        alert('Contraseña cambiada exitosamente:');
         // Aquí podrías redirigir al usuario a otra página si lo deseas
         navigate('/Login');
       }
