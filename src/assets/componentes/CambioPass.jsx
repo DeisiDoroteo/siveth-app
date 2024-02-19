@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Label from "../componentes/ui/label.jsx";
 
 export default function CambioPass() {
+  const [ShowPwd, setShowPwd] = useState(false);
   const [contraseniaNueva, setContraseniaNueva] = useState("");
   const [repetirContraseniaNueva, setRepetirContraseniaNueva] = useState("");
   const [error, setError] = useState("");
@@ -52,18 +54,21 @@ export default function CambioPass() {
   };
   
   return (
-    <div>
-      <section className="bg-gray-50 w-screen dark:bg-gray-900">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+    <div >
+      <section >
+        <div div className="flex min-h-full flex-1 justify-center px-6 py-12 lg:px-8">
           <div className="w-full p-6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 sm:p-8">
-            <h2 className="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Cambio de contraseña
+              
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight pb-2.5 text-gray-900">
+            Cambiar contraseña
             </h2>
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 lg:mt-5 md:space-y-5">
               <div>
-                <label htmlFor="contraseniaNueva" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Nueva contraseña
-                </label>
+              <Label htmlFor="contraseniaNueva" >Nueva contraseña</Label>
+
+
+
+               
                 <input
                   type="password"
                   id="contraseniaNueva"
@@ -74,10 +79,13 @@ export default function CambioPass() {
                   required=""
                 />
               </div>
+
+
+
+              
               <div>
-                <label htmlFor="repetirContraseniaNueva" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Confirmar contraseña
-                </label>
+              <Label htmlFor="repetirContraseniaNueva" >Correo Electrónico</Label>
+            
                 <input
                   type="password"
                   id="repetirContraseniaNueva"
