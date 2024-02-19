@@ -64,7 +64,7 @@ app.post('/Login', (req, res, next) => {
   const query = 'SELECT * FROM Usuarios WHERE Correo = ?';
   db.query(query, [correo], (error, results) => {
       if (error) {
-          console.error('Error al realizar la consulta en la base de datos:', error);
+          console.error('Error al realizar la consulta en la base de datos intenta mas tarde:', error);
           res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
       } else {
           if (results.length > 0) {
