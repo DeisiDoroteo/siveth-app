@@ -60,22 +60,11 @@ function Register() {
     }
 
     // Validación de correo electrónico
-    if (!validarCorreo(correo)) {
-      setError("Correo electrónico inválido");
-      return;
-    }
+    
 
-    // Validación de teléfono
-    if (!validarTelefono(telefono)) {
-      setError("Teléfono inválido");
-      return;
-    }
+    
 
-    // Validación de contraseña
-    if (!validarContrasenia(contrasenia)) {
-      setError("La contraseña debe tener al menos 8 caracteres");
-      return;
-    }
+    
 
     // Validación de contraseña repetida
     if (contrasenia !== repetirContrasena) {
@@ -296,7 +285,7 @@ function Register() {
                 )}
                 {error && !validarCorreo(correo) && (
                   <span className="text-red-600 text-sm">
-                    Correo electrónico inválido
+                    Correo electrónico inválido12
                   </span>
                 )}
               </div>

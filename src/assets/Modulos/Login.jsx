@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Input from "../componentes/ui/input.jsx";
 import Label from "../componentes/ui/label.jsx";
 import Axios from "axios";
 import { Link } from 'react-router-dom';
+
 
 export default function Login({ title }) {
   const [email, setEmail] = useState("");

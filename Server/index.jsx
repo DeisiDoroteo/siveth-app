@@ -15,7 +15,8 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'Siveth',
+    database: 'siveth',
+    
 });
 
 // Configurar Nodemailer
