@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
+import { BiHide, BiShow } from "react-icons/bi";
+import '../styles/Hide.css'
 
 function Register() {
   const navigate = useNavigate();
-
+  const [ShowPwd, setShowPwd] = useState(false);
+  const [ShowPwds, setShowPwds] = useState(false);
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
   const [apellidoMaterno, setApellidoMaterno] = useState("");
@@ -73,12 +76,13 @@ function Register() {
     }
 
     // Validación de reCAPTCHA
+   
     if (!recaptchaValue) {
       setError("Por favor, verifica que no eres un robot");
       return;
     }
-
-    setError(""); // Reiniciar mensaje de error
+  
+    setError("");
 
     // Resto del código para registrar al usuario
     try {
@@ -329,24 +333,37 @@ function Register() {
                 <label htmlFor="Contraseña" className="font-bold">
                   Contraseña
                 </label>
-                <input
-                  type="password"
-                  className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
-                    error &&
-                    (!validarCampo(contrasenia) ||
-                      !validarContrasenia(contrasenia))
-                      ? "border-red-500"
-                      : validarCampo(contrasenia) &&
-                        validarContrasenia(contrasenia)
-                      ? "border-green-500"
-                      : ""
-                  }`}
-                  id="contrasenia"
-                  value={contrasenia}
-                  onChange={(e) => setContrasenia(e.target.value)}
-                  placeholder="Contraseña"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={ShowPwd ? "text" : "password"}
+                    className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2  outline-none text-neutral-800 ${
+                      error &&
+                      (!validarCampo(contrasenia) ||
+                        !validarContrasenia(contrasenia))
+                        ? "border-red-500"
+                        : validarCampo(contrasenia) &&
+                          validarContrasenia(contrasenia)
+                        ? "border-green-500"
+                        : ""
+                    }${ShowPwd ? "" : "hide-password-icon"}`}
+                    id="contrasenia"
+                    value={contrasenia}
+                    onChange={(e) => setContrasenia(e.target.value)}
+                    placeholder="Contraseña"
+                    required
+                    
+                  />
+                  <div
+                    className="absolute inset-y-0 top-1.5 right-0 pr-3 flex items-center text-sm leading-5"
+                    onClick={() => setShowPwd(!ShowPwd)}
+                  >
+                    {ShowPwd ? (
+                      <BiHide className="text-indigo-600 text-xl" />
+                    ) : (
+                      <BiShow className="text-indigo-500 text-xl" />
+                    )}
+                  </div>
+                </div>
                 {error && !validarCampo(contrasenia) && (
                   <span className="text-red-600 text-sm">
                     Campo obligatorio
@@ -364,24 +381,37 @@ function Register() {
                 <label htmlFor="RepetirContraseña" className="font-bold">
                   Confirmar Contraseña
                 </label>
-                <input
-                  type="password"
-                  className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
-                    error &&
-                    (!validarCampo(repetirContrasena) ||
-                      repetirContrasena !== contrasenia)
-                      ? "border-red-500"
-                      : validarCampo(repetirContrasena) &&
-                        repetirContrasena === contrasenia
-                      ? "border-green-500"
-                      : ""
-                  }`}
-                  id="repetirContrasena"
-                  value={repetirContrasena}
-                  onChange={(e) => setRepetirContrasena(e.target.value)}
-                  placeholder="Repetir Contraseña"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={ShowPwds ? "text" : "password"}
+                    className={`w-full rounded border border-gray-300 bg-inherit p-3  shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
+                      error &&
+                      (!validarCampo(repetirContrasena) ||
+                        repetirContrasena !== contrasenia)
+                        ? "border-red-500"
+                        : validarCampo(repetirContrasena) &&
+                          repetirContrasena === contrasenia
+                        ? "border-green-500"
+                        : ""
+                    }${ShowPwds ? "" : "hide-password-icon"}`}
+                    id="repetirContrasena"
+                    value={repetirContrasena}
+                    onChange={(e) => setRepetirContrasena(e.target.value)}
+                    placeholder="Repetir Contraseña"
+                    required
+                   
+                  />
+                  <div
+                    className="absolute inset-y-0 top-1.5 right-0 pr-3 flex items-center text-sm leading-5"
+                    onClick={() => setShowPwds(!ShowPwds)}
+                  >
+                    {ShowPwds ? (
+                      <BiHide className="text-indigo-600 text-xl" />
+                    ) : (
+                      <BiShow className="text-indigo-500 text-xl" />
+                    )}
+                  </div>
+                </div>
                 {error && !validarCampo(repetirContrasena) && (
                   <span className="text-red-600 text-sm">
                     Campo obligatorio

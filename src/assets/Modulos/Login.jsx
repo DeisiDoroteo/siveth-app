@@ -1,11 +1,14 @@
 import { useState } from "react";
 import Input from "../componentes/ui/input.jsx";
+import { BiHide , BiShow } from "react-icons/bi";
+import '../styles/Hide.css'
 import Label from "../componentes/ui/label.jsx";
 import Axios from "axios";
 import { Link } from 'react-router-dom';
 
 
 export default function Login({ title }) {
+  const [ShowPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailValid, setEmailValid] = useState(true); // Estado para verificar si el correo es válido
@@ -64,8 +67,10 @@ export default function Login({ title }) {
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <a href="#">{title}</a>
         </div>
-
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight pb-2.5 text-gray-900">
+            Iniciar sesion
+          </h2>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="email">Correo Electrónico</Label>
@@ -79,33 +84,66 @@ export default function Login({ title }) {
                   placeholder="example@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{ borderColor: emailValid && email.trim() !== '' ? 'green' : emailValid ? '' : 'red' }} // Cambia el color del borde según la validación y si el campo está vacío
+                  style={{
+                    borderColor:
+                      emailValid && email.trim() !== ""
+                        ? "green"
+                        : emailValid
+                        ? ""
+                        : "red",
+                  }} // Cambia el color del borde según la validación y si el campo está vacío
                 />
               </div>
-              {!emailValid && <span className="text-red-600 text-sm">Correo electrónico inválido</span>}
+              {!emailValid && (
+                <span className="text-red-600 text-sm">
+                  Correo electrónico inválido
+                </span>
+              )}
             </div>
 
             <div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Contraseña</Label>
                 <div className="text-sm">
-                  <Link to="/SendEmail" className="font-semibold text-indigo-600 hover:text-indigo-500">¿Olvidó su contraseña?</Link>
+                  <Link
+                    to="/SendEmail"
+                    className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
+                    ¿Olvidó su contraseña?
+                  </Link>
                 </div>
               </div>
-              <div className="mt-2">
+              <div className="mt-2 relative">
                 <Input
                   id="password"
                   name="password"
-                  type="password"
+                  type={ShowPwd ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   placeholder="****"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ borderColor: passwordValid && password.trim() !== '' ? 'green' : passwordValid ? '' : 'red' }} // Cambia el color del borde según la validación y si el campo está vacío
-                />
+                  style={{
+                    borderColor:
+                      passwordValid && password.trim() !== ""
+                        ? "green"
+                        : passwordValid
+                        ? ""
+                        : "red",
+                      }} // Cambia el color del borde según la validación y si el campo está vacío
+                      className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
+                        ShowPwd ? "" : "hide-password-icon"
+                      }`}
+                    />
+                <div className="absolute inset-y-0 top-1.5 right-0 flex items-center pr-3 " onClick={()=>setShowPwd(!ShowPwd)}>
+                  {ShowPwd ? <BiHide className="text-indigo-600 text-xl"/> : <BiShow className="text-indigo-500 text-xl"/>}
+                </div>
               </div>
-              {!passwordValid && <span className="text-red-600 text-sm">La contraseña debe tener al menos 8 caracteres</span>}
+              {!passwordValid && (
+                <span className="text-red-600 text-sm">
+                  La contraseña debe tener al menos 8 caracteres
+                </span>
+              )}
             </div>
 
             <div>
