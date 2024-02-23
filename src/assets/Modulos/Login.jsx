@@ -1,19 +1,21 @@
 import { useState } from "react";
 import Input from "../componentes/ui/input.jsx";
-import { BiHide , BiShow } from "react-icons/bi";
+import { BiHide, BiShow } from "react-icons/bi";
 import '../styles/Hide.css'
 import Label from "../componentes/ui/label.jsx";
 import Axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Link } from 'react-router-dom';
 import 'tailwindcss/tailwind.css';
-
 
 export default function Login({ title }) {
   const [ShowPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailValid, setEmailValid] = useState(true); // Estado para verificar si el correo es válido
-  const [passwordValid, setPasswordValid] = useState(true); // Estado para verificar si la contraseña es válida
+  const [passwordValid, setPasswordValid] = useState(true);
+  const [recaptchaValue, setRecaptchaValue] = useState(null); // Estado para verificar si el reCAPTCHA es válido
+  const [error, setError] = useState(""); // Estado para manejar mensajes de error
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,38 +29,49 @@ export default function Login({ title }) {
     const isValidPassword = password.length >= 8;
     setPasswordValid(isValidPassword);
 
-    if (!isValidEmail || email.trim() === '' || !isValidPassword || password.trim() === '') {
+    // Verificación del reCAPTCHA
+    if (!recaptchaValue) {
+      setError("Por favor, verifica que no eres un robot");
+      return;
+    }
+
+    if (
+      !isValidEmail ||
+      email.trim() === "" ||
+      !isValidPassword ||
+      password.trim() === ""
+    ) {
       return; // Si el correo o la contraseña no son válidos o están vacíos, no envíes la solicitud
     }
 
     // Resto del código para el inicio de sesión
     try {
       const response = await Axios.post(
-        'http://localhost:3001/Login',
+        "http://localhost:3001/Login",
         {
           correo: email,
           contrasenia: password,
         },
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
-  
+
       const responseData = response.data;
-  
-      if (response.status === 200 && responseData.status === 'success') {
+
+      if (response.status === 200 && responseData.status === "success") {
         // Redirige a la página de inicio del usuario o a donde desees
         window.location.href = "/admin/";
       } else {
         // Muestra un mensaje de error detallado si es posible
-        alert('Error en el inicio de sesión: ' + responseData.message);
+        alert("Error en el inicio de sesión: " + responseData.message);
       }
     } catch (error) {
       console.error("Error al enviar la solicitud:", error);
       // Muestra un mensaje de error genérico
-      alert('Error en el inicio de sesión. Contraseña incorrecta.');
+      alert("Error en el inicio de sesión. Contraseña incorrecta.");
     }
   };
 
@@ -70,7 +83,7 @@ export default function Login({ title }) {
         </div>
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight pb-2.5 text-gray-900">
-            Iniciar sesion
+            Iniciar sesión
           </h2>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
@@ -131,11 +144,11 @@ export default function Login({ title }) {
                         : passwordValid
                         ? ""
                         : "red",
-                      }} // Cambia el color del borde según la validación y si el campo está vacío
-                      className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
-                        ShowPwd ? "" : "hide-password-icon"
-                      }`}
-                    />
+                  }} // Cambia el color del borde según la validación y si el campo está vacío
+                  className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
+                    ShowPwd ? "" : "hide-password-icon"
+                  }`}
+                />
                 <div className="absolute inset-y-0 top-1.5 right-0 flex items-center pr-3 " onClick={()=>setShowPwd(!ShowPwd)}>
                   {ShowPwd ? <BiHide className="text-indigo-600 text-xl"/> : <BiShow className="text-indigo-500 text-xl"/>}
                 </div>
@@ -146,6 +159,21 @@ export default function Login({ title }) {
                 </span>
               )}
             </div>
+
+            {/* ReCAPTCHA */}
+            <div className="flex justify-center mt-4">
+              <ReCAPTCHA
+                sitekey="6LcqzmwpAAAAAHS95sakGoUwrQ73VRwYLVullfts"
+                onChange={(value) => setRecaptchaValue(value)}
+              />
+            </div>
+
+            {/* Mensaje de error */}
+            {error && (
+              <div className="text-red-600 text-sm text-center mb-4">
+                {error}
+              </div>
+            )}
 
             <div>
               <button
@@ -171,58 +199,3 @@ export default function Login({ title }) {
     </>
   );
 }
-
-
-/*
-   const handleSubmit = async (e) => {
-     e.preventDefault();
-
-      Realiza la solicitud GET al servidor para iniciar sesión
-     try {
-       const response = await Axios.post(
-         "http:localhost:3001/Login",
-         {
-           correo: email,
-           contrasenia: password,
-         },
-         {
-           headers: {
-             "Content-Type": "application/json",
-           },
-         }
-       );
-
-       const responseData = response.data;
-
-       if (response.status === 200 && responseData.status === "success") {
-          Redirige a la página de inicio del usuario o a donde desees
-         window.location.href = "/admin/";
-       } else {
-          Muestra un mensaje de error detallado si es posible
-         alert("Error en el inicio de sesión: " + responseData.message);
-       }
-     } catch (error) {
-        if (error.response) {
-           if (error.response.status === 400) {
-        Redirige a la página de Error400 si el código de estado es 400
-             window.location.href = "/Error400";
-           } else if (error.response.status === 500) {
-              Redirige a la página de Error500 si el código de estado es 500
-             window.location.href = "/Error500";
-           } else {
-              Muestra un mensaje de error detallado si es posible
-             alert("Error en el inicio de sesión: " + error.response.data.message);
-          }
-       }
-        if (error.request) {
-          La solicitud fue realizada pero no se recibió respuesta
-         console.error("No se recibió respuesta del servidor");
-        
-       } else {
-          Ocurrió un error antes de enviar la solicitud
-         console.error("Error al enviar la solicitud:", error.message);
-       }
-      
-     }
-   };
-*/
