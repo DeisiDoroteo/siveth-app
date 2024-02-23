@@ -20,6 +20,7 @@ function Register() {
   const [edad, setEdad] = useState("");
   const [error, setError] = useState("");
   const [recaptchaValue, setRecaptchaValue] = useState(null);
+  const [aceptarTerminos, setAceptarTerminos] = useState(false);
 
   const validarCampo = (valor) => {
     return valor.trim() !== "";
@@ -56,7 +57,8 @@ function Register() {
       !validarCampo(correo) ||
       !validarCampo(telefono) ||
       !validarCampo(contrasenia) ||
-      !validarCampo(edad)
+      !validarCampo(edad)||
+      !aceptarTerminos
     ) {
       setError("Hay campos vacíos");
       return;
@@ -424,6 +426,21 @@ function Register() {
                 )}
               </div>
             </div>
+
+            <div className="flex items-center mb-4 ml-5">
+              <input
+                type="checkbox"
+                id="aceptarTerminos"
+                checked={aceptarTerminos}
+                onChange={() => setAceptarTerminos(!aceptarTerminos)}
+                className="mr-2"
+                required
+              />
+              <label htmlFor="aceptarTerminos" className="font-bold">
+                Acepto los términos y condiciones
+              </label>
+            </div>
+
 
             {/* ReCAPTCHA */}
             <div className="flex justify-center mt-4">

@@ -5,6 +5,7 @@ import '../styles/Hide.css'
 import Label from "../componentes/ui/label.jsx";
 import Axios from "axios";
 import { Link } from 'react-router-dom';
+import 'tailwindcss/tailwind.css';
 
 
 export default function Login({ title }) {

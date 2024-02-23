@@ -16,6 +16,9 @@ import Ayuda from "./assets/Modulos/Ayuda";
 import EnviaEmail from "./assets/componentes/EnviaEmail";
 import CodePass from "./assets/componentes/CodePass";
 import CambioPass from "./assets/componentes/CambioPass";
+import 'tailwindcss/tailwind.css';
+
+
 
 
 // import Titulo from "./assets/componentes/Titulo.jsx";

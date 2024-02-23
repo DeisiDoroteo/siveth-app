@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 import { Link } from 'react-router-dom'
+import 'tailwindcss/tailwind.css';
 const products = [
   { name: 'Mudanzas', description: 'Get a better understanding of your traffic', href: '#', icon: ChartPieIcon },
   { name: 'Paqueteria', description: 'Speak directly to your customers', href: '#', icon: TruckIcon },
