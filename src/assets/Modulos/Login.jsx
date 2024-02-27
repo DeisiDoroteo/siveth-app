@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Input from "../componentes/ui/input.jsx";
 import { BiHide, BiShow } from "react-icons/bi";
 import '../styles/Hide.css'
@@ -12,24 +12,49 @@ export default function Login({ title }) {
   const [ShowPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [emailValid, setEmailValid] = useState(true); // Estado para verificar si el correo es válido
+  const [emailValid, setEmailValid] = useState(true);
   const [passwordValid, setPasswordValid] = useState(true);
-  const [recaptchaValue, setRecaptchaValue] = useState(null); // Estado para verificar si el reCAPTCHA es válido
-  const [error, setError] = useState(""); // Estado para manejar mensajes de error
+  const [recaptchaValue, setRecaptchaValue] = useState(null);
+  const [error, setError] = useState("");
+  const [disableButton, setDisableButton] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (attemptCount >= 3 && attemptCount < 6) {
+      setDisableButton(true);
+      setTimeLeft(30);
+      timer = setInterval(() => {
+        setTimeLeft(prevTime => prevTime - 1);
+      }, 1000);
+    } else if (attemptCount >= 6) {
+      setDisableButton(true);
+      setTimeLeft(60);
+      timer = setInterval(() => {
+        setTimeLeft(prevTime => prevTime - 1);
+      }, 1000);
+    }
+    return () => {
+      clearInterval(timer);
+    };
+  }, [attemptCount]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      setDisableButton(false);
+      setAttemptCount(0);
+    }
+  }, [timeLeft]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validación de correo electrónico
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValidEmail = emailPattern.test(email);
     setEmailValid(isValidEmail);
-
-    // Validación de la contraseña
     const isValidPassword = password.length >= 8;
     setPasswordValid(isValidPassword);
 
-    // Verificación del reCAPTCHA
     if (!recaptchaValue) {
       setError("Por favor, verifica que no eres un robot");
       return;
@@ -41,13 +66,12 @@ export default function Login({ title }) {
       !isValidPassword ||
       password.trim() === ""
     ) {
-      return; // Si el correo o la contraseña no son válidos o están vacíos, no envíes la solicitud
+      return;
     }
 
-    // Resto del código para el inicio de sesión
     try {
       const response = await Axios.post(
-        "http://localhost:3001/Login",
+        "https://back-end-siveth.onrender.com/Login",
         {
           correo: email,
           contrasenia: password,
@@ -62,16 +86,14 @@ export default function Login({ title }) {
       const responseData = response.data;
 
       if (response.status === 200 && responseData.status === "success") {
-        // Redirige a la página de inicio del usuario o a donde desees
         window.location.href = "/admin/";
       } else {
-        // Muestra un mensaje de error detallado si es posible
-        alert("Error en el inicio de sesión: " + responseData.message);
+        setError("Error en el inicio de sesión: " + responseData.message);
+        setAttemptCount(prevCount => prevCount + 1);
       }
     } catch (error) {
-      console.error("Error al enviar la solicitud:", error);
-      // Muestra un mensaje de error genérico
-      alert("Error en el inicio de sesión. Contraseña incorrecta.");
+      setError("Error en el inicio de sesión. Contraseña incorrecta.");
+      setAttemptCount(prevCount => prevCount + 1);
     }
   };
 
@@ -105,7 +127,7 @@ export default function Login({ title }) {
                         : emailValid
                         ? ""
                         : "red",
-                  }} // Cambia el color del borde según la validación y si el campo está vacío
+                  }}
                 />
               </div>
               {!emailValid && (
@@ -144,7 +166,7 @@ export default function Login({ title }) {
                         : passwordValid
                         ? ""
                         : "red",
-                  }} // Cambia el color del borde según la validación y si el campo está vacío
+                  }}
                   className={`w-full rounded border border-gray-300 bg-inherit p-3 shadow shadow-gray-100 mt-2 appearance-none outline-none text-neutral-800 ${
                     ShowPwd ? "" : "hide-password-icon"
                   }`}
@@ -160,7 +182,6 @@ export default function Login({ title }) {
               )}
             </div>
 
-            {/* ReCAPTCHA */}
             <div className="flex justify-center mt-4">
               <ReCAPTCHA
                 sitekey="6LcqzmwpAAAAAHS95sakGoUwrQ73VRwYLVullfts"
@@ -168,17 +189,28 @@ export default function Login({ title }) {
               />
             </div>
 
-            {/* Mensaje de error */}
             {error && (
               <div className="text-red-600 text-sm text-center mb-4">
                 {error}
               </div>
             )}
 
+            {attemptCount >= 3 && (
+              <div className="text-center text-gray-500 text-sm mt-2">
+                {attemptCount < 6 ? 
+                  `Botón bloqueado. Volverá a habilitarse en ${timeLeft} segundos.` :
+                  `Botón bloqueado. Volverá a habilitarse en ${timeLeft} segundos.`
+                }
+              </div>
+            )}
+
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className={`flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                  attemptCount >= 6 ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-500"
+                }`}
+                disabled={disableButton}
               >
                 Iniciar sesión
               </button>
